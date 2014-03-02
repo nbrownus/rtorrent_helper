@@ -1,16 +1,14 @@
 <?php
-define('RPC_TIME_OUT', 15);
-define('SCGI_HOST', '127.0.0.1');
-define('SCGI_PORT', '5000');
-
-define('SICKBEARD_SRC_DIR', '/storage/raid6/main/Downloads/SickBeard');
-define('SICKBEARD_PICKUP_DIR', '/storage/raid6/main/Downloads/.sickbeard_pickup');
-
-define('NEW_MOVIES_SRC_DIR', '/storage/raid6/main/Downloads/Movies');
-define('NEW_MOVIES_DEST_DIR', '/storage/raid6/main/Videos/Movies');
-
-define('PYTHON_PATH', '/usr/bin/python');
-define('SICKBEARD_AUTOSCRIPT', '/var/www/sickbeard/autoProcessTV/sabToSickBeard.py');
+defineEnv('RTORRENT_RPC_TIME_OUT');
+defineEnv('RTORRENT_RPC_TIME_OUT');
+defineEnv('RTORRENT_SCGI_HOST');
+defineEnv('RTORRENT_SCGI_PORT');
+defineEnv('PYTHON_PATH');
+defineEnv('SICKBEARD_SRC_DIR');
+defineEnv('SICKBEARD_PICKUP_DIR');
+defineEnv('SICKBEARD_AUTOSCRIPT');
+defineEnv('COUCHPOTATO_SRC_DIR');
+defineEnv('COUCHPOTATO_DEST_DIR');
 
 if (!isset($argv[1])) {
     throw new Exception('No torrent hash provided');
@@ -19,9 +17,21 @@ if (!isset($argv[1])) {
 Rename::single($argv[1]);
 
 class Rename {
-	private static $m_fileTypes = array('mkv', 'avi', 'mp4', 'mpg', 'mov');
 
-	public static function single($torrentHash) {
+    /**
+     * List of file types to handle
+     *
+     * @var array
+     */
+    private static $m_fileTypes = array('mkv', 'avi', 'mp4', 'mpg', 'mov');
+
+    /**
+     * Handles moving a single torrent by it's hash
+     * The destination is dictated by the label in rtorrent
+     *
+     * @param String $torrentHash The rtorrent hash/id to process
+     */
+    public static function single($torrentHash) {
 		$torrentName = cXMLRPC::call('d.get_name', $torrentHash);
 		$torrentPath = cXMLRPC::call('d.get_base_path', $torrentHash);
 		$multiFile = cXMLRPC::call('d.is_multi_file', $torrentHash);
@@ -30,27 +40,27 @@ class Rename {
 		if ($label == 'SickBeard') {
 			self::_handleSickbeard($torrentName, $torrentPath, $multiFile);
 
-		} elseif ($label == 'Movies') {
-			self::_handleNewMovies($torrentName, $torrentPath, $multiFile);
+		} elseif ($label == 'CouchPotato') {
+			self::_handleCouchPotato($torrentName, $torrentPath, $multiFile);
 		} else {
             //throw new Exception('Unknown torrent label ' . $label);
         }
 	}
 
-	private static function _handleNewMovies($torrentName, $torrentPath, $multiFile) {
-		$movedBaseDir = NEW_MOVIES_SRC_DIR . '/';
+	private static function _handleCouchPotato($torrentName, $torrentPath, $multiFile) {
+		$movedBaseDir = COUCHPOTATO_SRC_DIR . '/';
 		if (substr($torrentName, -4, 1) == '.') {
 			$torrentName = substr($torrentName, 0, -4);
 		}
 
-		$hardLinkDestination = NEW_MOVIES_DEST_DIR . '/' . $torrentName . '/';
+		$hardLinkDestination = COUCHPOTATO_DEST_DIR . '/' . $torrentName . '/';
 		$hardLinkSources = array();
 
 		_log('Hard linking files to "' . $hardLinkDestination . '"');
 
 		if ($multiFile) {
 			$output = null;
-			_exec('find ' . escapeDir($movedBaseDir . basename($torrentPath)) . ' -name "*"', $output);
+			_exec('find ' . escapeshellarg($movedBaseDir . basename($torrentPath)) . ' -name "*"', $output);
 
 			foreach ($output as $line) {
 				if ($line != '' && stripos($line, 'sample') === false) {
@@ -69,16 +79,13 @@ class Rename {
 			$hardLinkSources[] = $movedBaseDir . basename($torrentPath);
 		}
 
-		_exec('mkdir -p ' . escapeDir($hardLinkDestination));
+		_exec('mkdir -p ' . escapeshellarg($hardLinkDestination));
 		foreach ($hardLinkSources as $hardLinkSource) {
-			_exec('ln ' . escapeDir($hardLinkSource) . ' ' . escapeDir($hardLinkDestination));
+			_exec('ln ' . escapeshellarg($hardLinkSource) . ' ' . escapeshellarg($hardLinkDestination));
 		}
 
-		//_exec('chown -R nate:nas ' . escapeDir($hardLinkDestination));
-		//_exec('chmod -R a-rwx+X,u+rw,g+rw,o+r ' . escapeDir($hardLinkDestination));
-
 		$output = array();
-		_exec('ls -l ' . escapeDir($hardLinkDestination), $output);
+		_exec('ls -l ' . escapeshellarg($hardLinkDestination), $output);
 		_log('');
 
 		$body = $hardLinkDestination . "\n";
@@ -97,7 +104,7 @@ class Rename {
             _log('Hard linking files to "' . $hardLinkDestination . '"');
 
 			$output = null;
-			_exec('find ' . escapeDir($movedBaseDir . basename($torrentPath)) . ' -name "*"', $output);
+			_exec('find ' . escapeshellarg($movedBaseDir . basename($torrentPath)) . ' -name "*"', $output);
 
 			foreach ($output as $line) {
 				if ($line != '' && stripos($line, 'sample') === false) {
@@ -119,12 +126,12 @@ class Rename {
 			$hardLinkSources[] = $movedBaseDir . basename($torrentPath);
 		}
 
-		_exec('mkdir -p ' . escapeDir($hardLinkDestination));
+		_exec('mkdir -p ' . escapeshellarg($hardLinkDestination));
 		foreach ($hardLinkSources as $hardLinkSource) {
-			_exec('ln ' . escapeDir($hardLinkSource) . ' ' . escapeDir($hardLinkDestination));
+			_exec('ln ' . escapeshellarg($hardLinkSource) . ' ' . escapeshellarg($hardLinkDestination));
 		}
 
-		_exec('ls -l ' . escapeDir($hardLinkDestination));
+		_exec('ls -l ' . escapeshellarg($hardLinkDestination));
 
 		_log('Notifying SickBeard');
 		_exec(PYTHON_PATH . ' ' . SICKBEARD_AUTOSCRIPT . ' ' . SICKBEARD_PICKUP_DIR . ' ' . $torrentName);
@@ -167,7 +174,7 @@ class cXMLRPC {
 	private static function send($xml) {
 		$result = false;
 		$contentLength = strlen($xml);
-		$socket = fsockopen(SCGI_HOST, SCGI_PORT, $errorNumber, $errorString, RPC_TIME_OUT);
+		$socket = fsockopen(RTORRENT_SCGI_HOST, RTORRENT_SCGI_PORT, $errorNumber, $errorString, RTORRENT_RPC_TIME_OUT);
 
 		if ($socket) {
 			$header = 'CONTENT_LENGTH' . "\x0" . $contentLength . "\x0" . 'SCGI' . "\x0" . "1\x0";
@@ -232,6 +239,7 @@ class cXMLRPC {
  * Performs curl calls for the Direct API, other projects may use this class directly
  */
 class cCurl {
+
 	/** The last tried URL */
 	private static $m_lastUrl;
 
@@ -349,15 +357,22 @@ class cCurl {
 
 }
 
-function _log($msg, $debug = 0) {
-	if (!isset($GLOBALS['logOutput'])) {
-		$GLOBALS['logOutput'] = '';
-	}
-
-	$GLOBALS['logOutput'] .= $msg . "\n";
+/**
+ * Logs a message to stdout
+ *
+ * @param String $msg The message to log
+ */
+function _log($msg) {;
     echo $msg . "\n";
 }
 
+/**
+ * Helper for logging a call to `exec`
+ *
+ * @param String $cmd The command to execute
+ *
+ * @param array $output The output captured from stdout/stderr of the cmd
+ */
 function _exec($cmd, &$output = array()) {
 	$return = 0;
 
@@ -371,6 +386,17 @@ function _exec($cmd, &$output = array()) {
 	_log('        ! ' . (string) $return);
 }
 
-function escapeDir($dir) {
-	return escapeshellarg($dir);
+/**
+ * Defines a constant from an environment variable, throw an exception if it is not defined
+ *
+ * @param String $var The environment var to define a constant for
+ *
+ * @throws Exception If the environment var was not set
+ */
+function defineEnv($var) {
+    if (isset($_ENV[$var]) === false) {
+        throw new Exception($var . ' is not defined');
+    }
+
+    define($var, $_ENV[$var]);
 }

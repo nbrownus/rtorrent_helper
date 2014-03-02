@@ -1,6 +1,5 @@
 <?php
 defineEnv('RTORRENT_RPC_TIME_OUT');
-defineEnv('RTORRENT_RPC_TIME_OUT');
 defineEnv('RTORRENT_SCGI_HOST');
 defineEnv('RTORRENT_SCGI_PORT');
 defineEnv('PYTHON_PATH');
@@ -394,9 +393,9 @@ function _exec($cmd, &$output = array()) {
  * @throws Exception If the environment var was not set
  */
 function defineEnv($var) {
-    if (isset($_ENV[$var]) === false) {
+    if (!($value = getenv($var))) {
         throw new Exception($var . ' is not defined');
     }
 
-    define($var, $_ENV[$var]);
+    define($var, $value);
 }

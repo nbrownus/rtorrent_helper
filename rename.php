@@ -8,6 +8,7 @@ defineEnv('SICKBEARD_PICKUP_DIR');
 defineEnv('SICKBEARD_AUTOSCRIPT');
 defineEnv('COUCHPOTATO_SRC_DIR');
 defineEnv('COUCHPOTATO_DEST_DIR');
+defineEnv('COUCHPOTATO_API_URL');
 
 if (!isset($argv[1])) {
     throw new Exception('No torrent hash provided');
@@ -83,14 +84,11 @@ class Rename {
 			_exec('ln ' . escapeshellarg($hardLinkSource) . ' ' . escapeshellarg($hardLinkDestination));
 		}
 
-		$output = array();
-		_exec('ls -l ' . escapeshellarg($hardLinkDestination), $output);
+		_exec('ls -l ' . escapeshellarg($hardLinkDestination));
 		_log('');
 
-		$body = $hardLinkDestination . "\n";
-		foreach ($output as $line) {
-			$body .= $line . "\n";
-		}
+        _log('Notifying CouchPotato');
+        _exec('curl "' + escapeshellarg(COUCHPOTATO_DEST_DIR) + '/renamer.scan/?async=1"');
 	}
 
 	private static function _handleSickbeard($torrentName, $torrentPath, $multiFile) {

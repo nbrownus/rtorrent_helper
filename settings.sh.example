@@ -24,3 +24,6 @@ export PYTHON_PATH="/usr/bin/python"
 
 # The directory to put the video files for couchpotato to pick them up and move them
 # export COUCHPOTATO_DEST_DIR="/storage/downloads/.couchpotato_pickup"
+
+# The api url for couchpotato, including your api key
+# export COUCHPOTATO_API_URL="http://localhost:5050/couchpotato/api/your_api_key"

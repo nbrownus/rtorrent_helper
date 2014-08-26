@@ -88,7 +88,7 @@ class Rename {
 		_log('');
 
         _log('Notifying CouchPotato');
-        _exec('curl "' + escapeshellarg(COUCHPOTATO_DEST_DIR) + '/renamer.scan/?async=1"');
+        _exec('curl "' . escapeshellarg(COUCHPOTATO_API_URL) . '/renamer.scan/?async=1"');
 	}
 
 	private static function _handleSickbeard($torrentName, $torrentPath, $multiFile) {

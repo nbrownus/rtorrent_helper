@@ -40,7 +40,7 @@ class Rename {
 		if ($label == 'SickBeard') {
 			self::_handleSickbeard($torrentName, $torrentPath, $multiFile);
 
-		} elseif ($label == 'CouchPotato') {
+		} elseif ($label == 'CouchPotato' || $label == 'Movies') {
 			self::_handleCouchPotato($torrentName, $torrentPath, $multiFile);
 		} else {
             //throw new Exception('Unknown torrent label ' . $label);
@@ -88,7 +88,7 @@ class Rename {
 		_log('');
 
         _log('Notifying CouchPotato');
-        _exec('curl "' . escapeshellarg(COUCHPOTATO_API_URL) . '/renamer.scan/?async=1"');
+        _exec('curl ' . escapeshellarg(COUCHPOTATO_API_URL . '/renamer.scan/?async=1'));
 	}
 
 	private static function _handleSickbeard($torrentName, $torrentPath, $multiFile) {

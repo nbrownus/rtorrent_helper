@@ -88,6 +88,8 @@ class Rename {
 
         _log('Notifying CouchPotato');
         _exec('curl ' . escapeshellarg(COUCHPOTATO_API_URL . '/renamer.scan/?async=1'));
+
+        sleep(1);
         _exec('find ' . COUCHPOTATO_API_URL . ' -mindepth 1 -type d -empty -delete');
     }
 
@@ -133,6 +135,8 @@ class Rename {
 
         _log('Notifying SickBeard');
         _exec('curl ' . escapeshellarg(SICKBEARD_API_URL . '?cmd=postprocess'));
+
+        sleep(1);
         _exec('find ' . SICKBEARD_PICKUP_DIR . ' -mindepth 1 -type d -empty -delete');
     }
 }

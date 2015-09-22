@@ -2,7 +2,6 @@
 defineEnv('RTORRENT_RPC_TIME_OUT');
 defineEnv('RTORRENT_SCGI_HOST');
 defineEnv('RTORRENT_SCGI_PORT');
-defineEnv('PYTHON_PATH');
 defineEnv('SICKBEARD_SRC_DIR');
 defineEnv('SICKBEARD_PICKUP_DIR');
 defineEnv('SICKBEARD_API_URL');

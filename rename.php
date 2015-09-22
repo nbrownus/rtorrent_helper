@@ -85,10 +85,10 @@ class Rename {
 
         _exec('chmod -R u=rwX,g=rwX,o=rX ' . escapeshellarg($hardLinkDestination));
         _exec('ls -l ' . escapeshellarg($hardLinkDestination));
-        _log('');
 
         _log('Notifying CouchPotato');
         _exec('curl ' . escapeshellarg(COUCHPOTATO_API_URL . '/renamer.scan/?async=1'));
+        _exec('find ' . COUCHPOTATO_API_URL . ' -mindepth 1 -type d -empty -delete');
     }
 
     private static function _handleSickbeard($torrentName, $torrentPath, $multiFile) {
@@ -133,9 +133,6 @@ class Rename {
 
         _log('Notifying SickBeard');
         _exec('curl ' . escapeshellarg(SICKBEARD_API_URL . '?cmd=postprocess'));
-
-        _log('');
-
         _exec('find ' . SICKBEARD_PICKUP_DIR . ' -mindepth 1 -type d -empty -delete');
     }
 }

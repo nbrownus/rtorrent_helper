@@ -84,7 +84,7 @@ class Rename {
 			_exec('ln ' . escapeshellarg($hardLinkSource) . ' ' . escapeshellarg($hardLinkDestination));
 		}
 
-                _exec('chmod -R u=rwX,g=rwX,o=rX ' . escapeDir($hardLinkDestination));
+                _exec('chmod -R u=rwX,g=rwX,o=rX ' . escapeshellarg($hardLinkDestination));
 		_exec('ls -l ' . escapeshellarg($hardLinkDestination));
 		_log('');
 
@@ -129,7 +129,7 @@ class Rename {
 			_exec('ln ' . escapeshellarg($hardLinkSource) . ' ' . escapeshellarg($hardLinkDestination));
 		}
 
-                _exec('chmod -R u=rwX,g=rwX,o=rX ' . escapeDir($hardLinkDestination));
+                _exec('chmod -R u=rwX,g=rwX,o=rX ' . escapeshellarg($hardLinkDestination));
 		_exec('ls -l ' . escapeshellarg($hardLinkDestination));
 
 		_log('Notifying SickBeard');

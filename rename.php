@@ -5,7 +5,7 @@ defineEnv('RTORRENT_SCGI_PORT');
 defineEnv('PYTHON_PATH');
 defineEnv('SICKBEARD_SRC_DIR');
 defineEnv('SICKBEARD_PICKUP_DIR');
-defineEnv('SICKBEARD_AUTOSCRIPT');
+defineEnv('SICKBEARD_API_URL');
 defineEnv('COUCHPOTATO_SRC_DIR');
 defineEnv('COUCHPOTATO_DEST_DIR');
 defineEnv('COUCHPOTATO_API_URL');
@@ -131,7 +131,7 @@ class Rename {
 		_exec('ls -l ' . escapeshellarg($hardLinkDestination));
 
 		_log('Notifying SickBeard');
-		_exec(PYTHON_PATH . ' ' . SICKBEARD_AUTOSCRIPT . ' ' . SICKBEARD_PICKUP_DIR . ' ' . $torrentName);
+		_exec('curl ' . escapeshellarg(SICKBEARD_API_URL . '?cmd=postprocess'));
 
 		_log('');
 
